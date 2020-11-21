@@ -1,28 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
 
-    <title>Hello!</title>
-    
-    <!-- import the webpage's stylesheet -->
-    <link rel="stylesheet" href="/style.css">
-    
-    <!-- import the webpage's javascript file -->
-    <script src="/script.js" defer></script>
-  </head>  
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.17.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.17.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.12.2"></script>
+
+    <style media="screen">
+      /* Add space between Vega-Embed links  */
+      .vega-actions a {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
   <body>
-    <h1>Hi there!</h1>
-    
-    <p>
-      I'm your cool new webpage. Made with <a href="https://glitch.com">Glitch</a>!
-    </p>
+    <h1>Embedding Vega-Lite Visualization</h1>
+    <!-- Container for the visualization -->
+    <div id="vis"></div>
 
-    <!-- include the Glitch button to show what the webpage is about and
-          to make it easier for folks to view source and remix -->
-    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
-    <script src="https://button.glitch.me/button.js" defer></script>
+    <script>
+      // Assign the specification to a local variable vlSpec.
+      var vlSpec = {
+       "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "data": {"url": "https://api.covidtracking.com/v1/states/current.csv"},
+  
+  "vconcat": [ 
+    
+    {  "width": 650,
+      "height": 150,
+      "mark": {"type": "point", "size": 60},
+      "selection": {"brush": {"type": "interval"}},
+      "encoding": {
+        "x": {"field": "positive", "title": "positive", "type": "quantitative"},
+        "y": {"field": "death", "title": "death", "type": "quantitative"},
+        "color": {
+           "condition":{
+             "selection":"brush","field": "dataQualityGrade",
+            "type": "nominal"},
+           "value":"grey"
+            },
+        "tooltip":{"field":"state", "type": "nominal" } 
+      }},
+{   "repeat": ["hospitalizedCumulative", "recovered"], 
+  "columns":1,
+  "spec":{
+      "width": 650,
+      "height":100,
+      "mark":"bar",
+      "transform": [
+        {
+          "filter": {
+            "and": [ {"selection": "brush"}]
+          }
+        }
+      ],
+      "encoding":{
+        "x":{
+          "field":"state",
+          "type": "nominal"
+        },
+        "y": {
+          "field": {"repeat":"repeat"},
+          "type":"quantitative"
+        }
+      }
+    }}
+  ]
+        
+        
+        
+      };
+
+      // Embed the visualization in the container with id `vis`
+      vegaEmbed('#vis', vlSpec);
+    </script>
   </body>
 </html>
